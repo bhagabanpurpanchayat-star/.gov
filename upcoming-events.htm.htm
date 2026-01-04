@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIT Status Board | Government Tenders</title>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, #0c2b5e 0%, #1a4a8f 50%, #2c5282 100%);
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    color: #333;
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+  }
+
+  /* Animated background particles */
+  .particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+
+  .particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 20s infinite linear;
+  }
+
+  /* Header with glass effect */
+  .dashboard-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 15px 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 100;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .logo-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .title-section h1 {
+    font-size: 24px;
+    color: white;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .title-section p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 4px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .live-badge {
+    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+    color: white;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: pulse 2s infinite;
+    box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+  }
+
+  .live-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse-dot 1.5s infinite;
+  }
+
+  .datetime {
+    font-size: 14px;
+    color: white;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+  }
+
+  /* Search box */
+  .search-container {
+    max-width: 1600px;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+
+  .search-box {
+    position: relative;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 15px 50px 15px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .search-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .search-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 20px;
+  }
+
+  .search-stats {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Main container */
+  .dashboard-container {
+    max-width: 1600px;
+    margin: 0 auto 20px;
+    padding: 0 20px;
+    height: calc(100vh - 220px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .container-title {
+    color: white;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .container-title h2 {
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Scroll container with glass effect */
+  .scroll-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    flex: 1;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .scroll-wrapper {
+    height: 100%;
+    overflow-y: auto;
+    padding: 15px;
+  }
+
+  .scroll-content {
+    position: relative;
+  }
+
+  /* Cards with glass frame and raised edges */
+  .card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.1),
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Raised edge effect */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+    border-radius: 12px 12px 0 0;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+      0 8px 30px rgba(0, 0, 0, 0.15),
+      0 12px 40px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .nit-id {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0c2b5e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nit-id::before {
+    content: '📋';
+    font-size: 16px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+  }
+
+  .date-badge {
+    background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+  }
+
+  .card-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+  }
+
+  .label {
+    font-weight: 600;
+    color: #1976d2;
+    font-size: 14px;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .value {
+    color: #333;
+    font-size: 15px;
+    flex: 1;
+    line-height: 1.5;
+  }
+
+  .amount-highlight {
+    background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 18px;
+    text-align: center;
+    grid-column: span 2;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(25, 118, 210, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  /* Footer */
+  .dashboard-footer {
+    margin-top: 20px;
+    text-align: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .footer-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .stats {
+    display: inline-flex;
+    gap: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 25px;
+    border-radius: 20px;
+    margin-top: 10px;
+    backdrop-filter: blur(5px);
+  }
+
+  /* Custom scrollbar */
+  .scroll-wrapper::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .scroll-wrapper::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin: 5px;
+  }
+
+  .scroll-wrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #1976d2 0%, #2196f3 100%);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #1565c0 0%, #1e88e5 100%);
+  }
+
+  /* Animations */
+  @keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-20px) translateX(10px); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  /* Highlight search matches */
+  .highlight {
+    background-color: #fff9c4;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(255, 183, 77, 0.3);
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-size: 16px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .card-body {
+      grid-template-columns: 1fr;
+    }
+    
+    .amount-highlight {
+      grid-column: span 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+    
+    .status-bar {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .info-row {
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .label {
+      min-width: auto;
+    }
+  }
+</style>
+</head>
+
+<body>
+<!-- Animated background particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Header with glass effect -->
+<header class="dashboard-header">
+  <div class="header-content">
+    <div class="logo-section">
+      <div class="logo-icon">NIT</div>
+      <div class="title-section">
+        <h1>National Tender Information System</h1>
+        <p>Government of India • Ministry of Finance</p>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="live-badge">LIVE UPDATES</div>
+      <div class="datetime" id="datetime">Loading...</div>
+    </div>
+  </div>
+</header>
+
+<!-- Search box -->
+<div class="search-container">
+  <div class="search-box">
+    <input type="text" 
+           id="searchInput" 
+           class="search-input" 
+           placeholder="Search tenders by NIT number, work description, location, amount, or any keyword..."
+           autocomplete="off">
+    <div class="search-icon">🔍</div>
+  </div>
+  <div class="search-stats">
+    <span id="totalTenders">Loading tenders...</span>
+    <span id="searchResults">Type to search</span>
+  </div>
+</div>
+
+<!-- Main Dashboard -->
+<main class="dashboard-container">
+  <div class="container-title">
+    <h2>Active Notice Inviting Tenders <span style="opacity: 0.8;">• Real-time Updates</span></h2>
+  </div>
+  
+  <div class="scroll-container">
+    <div class="scroll-wrapper" id="scrollWrapper">
+      <div id="scrollContent" class="scroll-content"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="dashboard-footer">
+  <div class="footer-content">
+    <p>Official Tender Information Portal • Updated in Real-time</p>
+    <div class="stats">
+      <span id="activeCount">--</span>
+      <span>Last Updated: <span id="lastUpdate">--:--</span></span>
+      <span id="matchCount">-- matches</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzzsy5QmPIqLUdtnVkW9ZmNsS1s9Cy930isOUE7lMutZbY1e2F0sBz39UJVXD89TF0m/exec";
+
+let allTenders = [];
+let filteredTenders = [];
+
+// Create animated background particles
+function createParticles() {
+  const particlesContainer = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.width = `${Math.random() * 100 + 50}px`;
+    particle.style.height = particle.style.width;
+    particle.style.left = `${Math.random() * 100}%`;
+    particle.style.top = `${Math.random() * 100}%`;
+    particle.style.opacity = Math.random() * 0.1 + 0.05;
+    particle.style.animationDelay = `${Math.random() * 20}s`;
+    particlesContainer.appendChild(particle);
+  }
+}
+
+// Update date and time
+function updateDateTime() {
+  const now = new Date();
+  const options = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  };
+  document.getElementById('datetime').textContent = now.toLocaleDateString('en-US', options);
+  document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('en-US', {hour12: false});
+}
+
+// Escape special regex characters
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Highlight matching text in search results
+function highlightText(text, searchTerm) {
+  if (!searchTerm || !text) return text;
+  
+  try {
+    const escapedSearchTerm = escapeRegExp(searchTerm);
+    const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+    return text.toString().replace(regex, '<span class="highlight">$1</span>');
+  } catch (e) {
+    return text;
+  }
+}
+
+// Check if a tender matches the search term
+function tenderMatchesSearch(tender, searchTerm) {
+  if (!searchTerm) return true;
+  
+  const searchLower = searchTerm.toLowerCase();
+  
+  // Check all fields in the tender object
+  return Object.values(tender).some(value => {
+    if (value && typeof value === 'string') {
+      return value.toLowerCase().includes(searchLower);
+    }
+    return false;
+  });
+}
+
+// Search function
+function performSearch() {
+  const searchTerm = document.getElementById('searchInput').value.trim();
+  const statsElement = document.getElementById('searchResults');
+  const matchCountElement = document.getElementById('matchCount');
+  
+  if (!searchTerm) {
+    // Show all tenders if search is empty
+    filteredTenders = [...allTenders];
+    statsElement.textContent = `Showing all ${allTenders.length} tenders`;
+    matchCountElement.textContent = `${allTenders.length} items`;
+    renderTenders();
+    return;
+  }
+  
+  // Filter tenders by search term
+  filteredTenders = allTenders.filter(tender => 
+    tenderMatchesSearch(tender, searchTerm)
+  );
+  
+  // Update statistics
+  const matchCount = filteredTenders.length;
+  statsElement.textContent = `Found ${matchCount} tender${matchCount !== 1 ? 's' : ''} matching "${searchTerm}"`;
+  matchCountElement.textContent = `${matchCount} matches`;
+  
+  // Render the filtered tenders
+  renderTenders(searchTerm);
+}
+
+// Render tenders with optional search highlighting
+function renderTenders(searchTerm = '') {
+  const container = document.getElementById('scrollContent');
+  
+  if (!filteredTenders || filteredTenders.length === 0) {
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <div class="nit-id">No Tenders Found</div>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="value no-results">
+              ${searchTerm ? `No tenders found matching "${searchTerm}"` : 'No tenders available at the moment. Please check back later.'}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  let cardsHTML = '';
+  
+  filteredTenders.forEach((tender, index) => {
+    cardsHTML += `
+      <div class="card" style="animation-delay: ${index * 0.05}s">
+        <div class="card-header">
+          <div class="nit-id">${highlightText(`NIT No: ${tender.nitNo || 'N/A'}`, searchTerm)}</div>
+          <div class="date-badge">${tender.date || 'Date not specified'}</div>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">📊 Serial No</span>
+            <span class="value">${highlightText(tender.sl || 'N/A', searchTerm)}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">🔗 Activity ID</span>
+            <span class="value">${highlightText(tender.act || 'N/A', searchTerm)}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">🏗️ Work Description</span>
+            <span class="value">${highlightText(tender.work || 'Not specified', searchTerm)}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">📍 Site Details</span>
+            <span class="value">${highlightText(tender.site || 'Location not specified', searchTerm)}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">💰 Funding Source</span>
+            <span class="value">${highlightText(tender.fund || 'Not specified', searchTerm)}</span>
+          </div>
+          <div class="amount-highlight">
+            💰 Tendered Amount: ${highlightText(`₹${tender.amt ? Number(tender.amt).toLocaleString('en-IN') : '0'}`, searchTerm)}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = cardsHTML;
+}
+
+// Initialize the dashboard
+function initDashboard() {
+  createParticles();
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+  
+  // Setup search input with debouncing
+  const searchInput = document.getElementById('searchInput');
+  let searchTimeout;
+  
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(performSearch, 300);
+  });
+  
+  // Also trigger search on Enter key
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      performSearch();
+    }
+  });
+  
+  // Clear search button functionality
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      performSearch();
+    }
+  });
+  
+  // Fetch data
+  fetch(WEB_APP_URL)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format received');
+      }
+      
+      allTenders = data;
+      filteredTenders = [...allTenders];
+      
+      // Update statistics
+      document.getElementById('totalTenders').textContent = `Total Tenders: ${data.length}`;
+      document.getElementById('searchResults').textContent = `Showing all ${data.length} tenders`;
+      document.getElementById('activeCount').textContent = `${data.length} Active Tenders`;
+      document.getElementById('matchCount').textContent = `${data.length} items`;
+      
+      renderTenders();
+    })
+    .catch(err => {
+      console.error('Error fetching data:', err);
+      document.getElementById('scrollContent').innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="nit-id">⚠️ Connection Error</div>
+          </div>
+          <div class="card-body">
+            <div class="info-row">
+              <span class="label">Status</span>
+              <span class="value">Unable to connect to server. Please check your internet connection and try again.</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Error Details</span>
+              <span class="value">${err.message}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('totalTenders').textContent = 'Error loading data';
+      document.getElementById('searchResults').textContent = 'Please try again later';
+    });
+}
+
+// Start the dashboard
+document.addEventListener('DOMContentLoaded', initDashboard);
+
+// Test with sample data if API fails
+const sampleData = [
+  {
+    nitNo: "NIT-2024-001",
+    date: "2024-01-15",
+    sl: "001",
+    act: "ACT-2024-001",
+    work: "Road Construction - Highway NH-44",
+    site: "Delhi to Chandigarh Highway",
+    fund: "National Highway Authority of India",
+    amt: "25000000"
+  },
+  {
+    nitNo: "NIT-2024-002",
+    date: "2024-01-16",
+    sl: "002",
+    act: "ACT-2024-002",
+    work: "Hospital Building Construction",
+    site: "Mumbai, Maharashtra",
+    fund: "Ministry of Health",
+    amt: "50000000"
+  },
+  {
+    nitNo: "NIT-2024-003",
+    date: "2024-01-17",
+    sl: "003",
+    act: "ACT-2024-003",
+    work: "School Renovation Project",
+    site: "Kolkata, West Bengal",
+    fund: "Education Department",
+    amt: "12000000"
+  }
+];
+</script>
+</body>
+</html>
