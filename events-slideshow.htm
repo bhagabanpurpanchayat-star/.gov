@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Photo Slideshow</title>
+<title>3D Rotating Group Slideshow</title>
 
 <style>
   body {
@@ -12,72 +12,123 @@
     font-family: Arial, sans-serif;
   }
 
-  #slideshow {
+  .scene {
     width: 100vw;
     height: 100vh;
+    perspective: 1400px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  img {
-    max-width: 100%;
-    max-height: 100%;
+  .group {
+    display: flex;
+    gap: 30px;
+    transform-style: preserve-3d;
+    transition: transform 1.2s ease, opacity 1.2s ease;
+  }
+
+  .group.hidden {
+    transform: rotateY(-90deg);
+    opacity: 0;
+  }
+
+  .group.visible {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+
+  .card {
+    width: 26vw;
+    height: 60vh;
+    position: relative;
+    background: black;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(255,255,255,0.15);
+  }
+
+  .card img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    animation: fade 1s ease-in-out;
+    border-radius: 12px;
   }
 
-  @keyframes fade {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  #counter {
-    position: fixed;
-    bottom: 10px;
-    right: 20px;
-    color: white;
-    font-size: 14px;
-    opacity: 0.7;
+  .watermark {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 10px 5px;
+    text-align: center;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    font-size: 15px;
+    letter-spacing: 0.4px;
   }
 </style>
 </head>
 
 <body>
 
-<div id="slideshow">
-  <img id="slide" src="">
+<div class="scene">
+  <div id="group" class="group hidden"></div>
 </div>
-<div id="counter"></div>
 
 <script>
-  // 🔴 PASTE YOUR WEB APP URL HERE
+  // 🔴 PUT YOUR WEB APP URL HERE
   const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzkBy04Df6QnVTx08XOgO3gOld-4kVcZdwedHE5vpoSrBRhMyDUexVxhJIgjveS8HVSGA/exec";
 
-  let images = [];
+  const PHOTOS_PER_GROUP = 3; // change to 2 if needed
+  const INTERVAL = 5000;
+
+  let data = [];
   let index = 0;
-  const interval = 4000; // 4 seconds
+  const groupEl = document.getElementById("group");
 
   fetch(WEBAPP_URL)
-    .then(res => res.json())
-    .then(data => {
-      images = data;
-      if (images.length > 0) {
-        showSlide();
-        setInterval(nextSlide, interval);
-      }
-    })
-    .catch(err => console.error("Error loading images", err));
+    .then(r => r.json())
+    .then(json => {
+      data = json;
+      showGroup();
+      setInterval(rotateGroup, INTERVAL);
+    });
 
-  function showSlide() {
-    document.getElementById("slide").src = images[index];
-    document.getElementById("counter").innerText =
-      "Photo " + (index + 1) + " of " + images.length;
+  function rotateGroup() {
+    // rotate OUT
+    groupEl.classList.remove("visible");
+    groupEl.classList.add("hidden");
+
+    setTimeout(showGroup, 1200);
   }
 
-  function nextSlide() {
-    index = (index + 1) % images.length;
-    showSlide();
+  function showGroup() {
+    groupEl.innerHTML = "";
+
+    for (let i = 0; i < PHOTOS_PER_GROUP; i++) {
+      const item = data[(index + i) % data.length];
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const img = document.createElement("img");
+      img.src = item.photo;
+
+      const wm = document.createElement("div");
+      wm.className = "watermark";
+      wm.innerText = `${item.name} | ${item.village}`;
+
+      card.appendChild(img);
+      card.appendChild(wm);
+      groupEl.appendChild(card);
+    }
+
+    index = (index + PHOTOS_PER_GROUP) % data.length;
+
+    // rotate IN
+    requestAnimationFrame(() => {
+      groupEl.classList.remove("hidden");
+      groupEl.classList.add("visible");
+    });
   }
 </script>
 
